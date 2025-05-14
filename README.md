@@ -1,6 +1,6 @@
 ## 🎨 art-vandelay
 
-A containerized workflow to query object data from [The Met's API](https://metmuseum.github.io/), generate OpenAI's [CLIP](https://www.github.com/jina-ai/clip-as-service) image embeddings, and load them into `art-vandelay-db`: an OpenSearch vector database as well as S3 bucket for corresponding images. The process is accelerated by GPU.
+A containerized, GPU-accelerated workflow to query object data from [The Met's API](https://metmuseum.github.io/), generate OpenAI's [CLIP](https://www.github.com/jina-ai/clip-as-service) image embeddings, and load them into `art-vandelay-db`: an OpenSearch vector database. The stack also deploys an S3 bucket for miscellaneous storage.
 
 ## Folder Structure
 
