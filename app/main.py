@@ -11,7 +11,7 @@ import aioboto3
 import aiohttp
 from PIL import Image
 from opensearchpy import OpenSearch, RequestsHttpConnection, AWSV4SignerAuth
-import clip  # Requires: pip install git+https://github.com/openai/CLIP.git
+import clip  # Requires: pip install git+https://github.com/openai/CLIP.git (in Dockerfile)
 
 CONCURRENT_REQUESTS = 20  # Tunable
 BASE_URL = "https://collectionapi.metmuseum.org/public/collection/v1"
