@@ -1,14 +1,12 @@
-# Welcome to your CDK TypeScript project
+## 🎨 art-vandelay
 
-This is a blank project for CDK development with TypeScript.
+This is a containerized process to query object data from The Met's API in order to generate image embeddings and load them into `art-vandelay-db`, an OpenSearch domain.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+## Folder Structure
 
-## Useful commands
+```
+```
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `cdk deploy`      deploy this stack to your default AWS account/region
-* `cdk diff`        compare deployed stack with current state
-* `cdk synth`       emits the synthesized CloudFormation template
+## CI/CD
+
+Deployed to AWS on commits to main.
