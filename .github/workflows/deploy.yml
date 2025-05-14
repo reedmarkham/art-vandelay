@@ -16,6 +16,7 @@ jobs:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      OPENSEARCH_DOMAIN_ARN: ${{ secrets.OPENSEARCH_DOMAIN_ARN }}
       AWS_IAM_ARN: ${{ secrets.AWS_IAM_ARN }}
 
     steps:
@@ -49,15 +50,15 @@ jobs:
     # Step 6: Ensure ECR Repository Exists
     - name: Ensure ECR Repository Exists
       run: |
-        aws ecr describe-repositories --repository-names poll-position --region $AWS_REGION || \
-        aws ecr create-repository --repository-name poll-position --region $AWS_REGION
+        aws ecr describe-repositories --repository-names art-vandelay --region $AWS_REGION || \
+        aws ecr create-repository --repository-name art-vandelay --region $AWS_REGION
 
     # Step 7: Build and push Docker image
     - name: Build and Push Docker Image
       run: |
-        docker build -t poll-position -f app/Dockerfile app
-        docker tag poll-position:latest ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/poll-position:latest
-        docker push ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/poll-position:latest
+        docker build -t art-vandelay -f app/Dockerfile app
+        docker tag art-vandelay:latest ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/art-vandelay:latest
+        docker push ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/art-vandelay:latest
 
     # Step 8: Bootstrap CDK (if needed)
     - name: Bootstrap CDK

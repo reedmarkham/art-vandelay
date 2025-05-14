@@ -13,11 +13,10 @@ from PIL import Image
 from opensearchpy import OpenSearch, RequestsHttpConnection, AWSV4SignerAuth
 import clip  # Requires: pip install git+https://github.com/openai/CLIP.git
 
-
+CONCURRENT_REQUESTS = 20  # Tunable
 BASE_URL = "https://collectionapi.metmuseum.org/public/collection/v1"
 OUTPUT_FILE = "met_objects.json"
 S3_BUCKET = os.getenv("S3_BUCKET")
-CONCURRENT_REQUESTS = 20  # Tunable
 OPENSEARCH_DOMAIN_ARN = os.getenv("OPENSEARCH_DOMAIN_ARN")
 
 # Set up OpenSearch client with AWS SigV4 auth

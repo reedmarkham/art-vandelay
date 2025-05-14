@@ -7,6 +7,8 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 
+// TO-DO: remove MET_API_KEY + inject other secrets from AWS Secrets Manager
+
 export class ArtVandelayStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -16,13 +18,11 @@ export class ArtVandelayStack extends cdk.Stack {
 
     // Add an AutoScalingGroup with GPU instances to the cluster
     cluster.addCapacity('GpuAutoScalingGroup', {
-      instanceType: new ec2.InstanceType('g4dn.xlarge'), // Or p3.2xlarge, etc.
+      instanceType: new ec2.InstanceType('g4dn.xlarge'), // Smallest g4 instance with GPU
       minCapacity: 1,
-      machineImage: ecs.EcsOptimizedImage.amazonLinux2(ecs.AmiHardwareType.GPU),
+      machineImage: ecs.EcsOptimizedImage.amazonLinux2(ecs.AmiHardwareType.GPU), // Use GPU-optimized AMI
       vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
     });
-
-    const metApiSecret = secretsmanager.Secret.fromSecretNameV2(this, 'MetApiKeySecret', 'MET_API_KEY');
 
     const taskRole = new iam.Role(this, 'ArtVandelayTaskRole', {
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
@@ -35,8 +35,6 @@ export class ArtVandelayStack extends cdk.Stack {
     const iamUser = iam.User.fromUserArn(this, 'ArtVandelayIamUser', iamUserArn);
 
     taskRole.grantAssumeRole(iamUser);
-
-    metApiSecret.grantRead(taskRole);
 
     const logGroup = new logs.LogGroup(this, 'ArtVandelayLogGroup');
 
@@ -55,7 +53,10 @@ export class ArtVandelayStack extends cdk.Stack {
       resources: ["*"],
     }));
 
-    const s3BucketName = process.env.S3_BUCKET || 'art-vandelay';
+    const s3BucketName = process.env.S3_BUCKET;
+    if (!s3BucketName) {
+      throw new Error('Environment variable S3_BUCKET is not defined');
+    }
     const bucket = new s3.Bucket(this, 'ArtVandelayBucket', {
       bucketName: s3BucketName,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -81,9 +82,6 @@ export class ArtVandelayStack extends cdk.Stack {
       }),
       environment: {
         S3_BUCKET: bucket.bucketName,
-      },
-      secrets: {
-        MET_API_KEY: ecs.Secret.fromSecretsManager(metApiSecret, 'MET_API_KEY'),
       },
     });
 

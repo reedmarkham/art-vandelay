@@ -1,6 +1,6 @@
 ## 🎨 art-vandelay
 
-This is a containerized process to query object data from The Met's API in order to generate [CLIP](https://github.com/jina-ai/clip-as-service) image embeddings and load them into `art-vandelay-db`: a previously-deployed OpenSearch domain and S3 bucket for corresponding images.
+This is a containerized process to query object data from The Met's API, generate [CLIP](https://github.com/jina-ai/clip-as-service) image embeddings, and load them into `art-vandelay-db`: a previously-deployed OpenSearch domain and S3 bucket for corresponding images. The process is accelerated by GPU.
 
 ## Folder Structure
 
