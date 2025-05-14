@@ -1,2 +1,4 @@
 aiohttp==3.11.18
 aioboto3==14.3.0
+torch==2.7.0
+PIL==11.2.1

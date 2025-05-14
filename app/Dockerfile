@@ -9,6 +9,7 @@ COPY . .
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install git+https://github.com/openai/CLIP.git
 
 # Set the entrypoint script
 ENTRYPOINT ["python", "main.py"]
