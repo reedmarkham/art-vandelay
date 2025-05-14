@@ -14,6 +14,15 @@ export class ArtVandelayStack extends cdk.Stack {
 
     const vpc = new ec2.Vpc(this, 'ArtVandelayVpc', { maxAzs: 2 });
     const cluster = new ecs.Cluster(this, 'ArtVandelayCluster', { vpc });
+
+    // Add an AutoScalingGroup with GPU instances to the cluster
+    cluster.addCapacity('GpuAutoScalingGroup', {
+      instanceType: new ec2.InstanceType('g4dn.xlarge'), // Or p3.2xlarge, etc.
+      minCapacity: 1,
+      machineImage: ecs.EcsOptimizedImage.amazonLinux2(ecs.AmiHardwareType.GPU),
+      vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
+    });
+
     const metApiSecret = secretsmanager.Secret.fromSecretNameV2(this, 'MetApiKeySecret', 'MET_API_KEY');
 
     const taskRole = new iam.Role(this, 'ArtVandelayTaskRole', {
@@ -47,13 +56,6 @@ export class ArtVandelayStack extends cdk.Stack {
       resources: ["*"],
     }));
 
-    const taskDef = new ecs.FargateTaskDefinition(this, 'ArtVandelayTaskDef', {
-      memoryLimitMiB: 512,
-      cpu: 256,
-      taskRole,
-      executionRole,
-    });
-
     const s3BucketName = process.env.S3_BUCKET || 'art-vandelay';
     const bucket = new s3.Bucket(this, 'ArtVandelayBucket', {
       bucketName: s3BucketName,
@@ -63,8 +65,17 @@ export class ArtVandelayStack extends cdk.Stack {
 
     bucket.grantReadWrite(taskRole);
 
-    taskDef.addContainer('ArtVandelayContainer', {
+    // GPU-enabled task definition
+    const taskDef = new ecs.Ec2TaskDefinition(this, 'ArtVandelayGpuTaskDef', {
+      networkMode: ecs.NetworkMode.AWS_VPC,
+    });
+
+    // Add GPU resource requirement
+    taskDef.addContainer('ArtVandelayGpuContainer', {
       image: ecs.ContainerImage.fromRegistry(`${cdk.Aws.ACCOUNT_ID}.dkr.ecr.${cdk.Aws.REGION}.amazonaws.com/art-vandelay:latest`),
+      memoryLimitMiB: 4096,
+      cpu: 1024,
+      gpuCount: 1,
       logging: ecs.LogDriver.awsLogs({
         streamPrefix: 'art-vandelay',
         logGroup,
@@ -77,14 +88,12 @@ export class ArtVandelayStack extends cdk.Stack {
       },
     });
 
-    new ecsPatterns.ScheduledFargateTask(this, 'ScheduledArtVandelayTask', {
+    // Add ECS Service using EC2 launch type
+    new ecs.Ec2Service(this, 'ArtVandelayGpuService', {
       cluster,
-      scheduledFargateTaskDefinitionOptions: {
-        taskDefinition: taskDef,
-      },
-      schedule: cdk.aws_events.Schedule.cron({ weekDay: 'MON', hour: '12', minute: '0' }),
-      subnetSelection: { subnetType: ec2.SubnetType.PUBLIC },
-      platformVersion: ecs.FargatePlatformVersion.LATEST,
+      taskDefinition: taskDef,
+      desiredCount: 1,
+      assignPublicIp: true,
     });
 
     new cdk.CfnOutput(this, 'AdHocTaskCommand', {
