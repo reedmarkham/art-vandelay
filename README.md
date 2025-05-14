@@ -23,6 +23,23 @@ poll-position/
 └── cdk.context.json                # CDK context for environment-specific configurations (auto-generated)
 ```
 
+## Prerequisites
+
+* AWS account and IAM user with minimal policy, like:
+```
+```
+* A deployment of requisite infrastructure like [art-vandelay-db](github.com/reedmarkham/art-vandelay-db)
+* Before running the workflow, add the following secrets to your GitHub repository’s **Settings > Secrets and variables > Actions > repository secrets**:
+
+| Secret Name         | Description                                              | Example                |
+|---------------------|---------------------------------------------------------|--------------------------------------|
+| `AWS_ACCESS_KEY_ID` | AWS access key with permissions for ECS, S3, OpenSearch | `AKIA...`                            |
+| `AWS_SECRET_ACCESS_KEY` | AWS secret key for the above access key             | `wJalrXUtnFEMI/K7MDENG/bPxRfiCY...`  |
+| `AWS_REGION`        | AWS region for deployment                               | `us-east-1`                          |
+| `AWS_IAM_ARN`       | ARN of IAM user allowed to assume ECS task role         | `arn:aws:iam::123456789012:user/ci`  |
+| `S3_BUCKET`         | Name of the S3 bucket for storing data and images       | `art-vandelay`                       |
+| `OPENSEARCH_DOMAIN_ARN` | ARN of the OpenSearch domain                       | `arn:aws:es:us-east-1:...:domain/...`|
+
 ## CI/CD
 
 Deployed to AWS on commits to main.
