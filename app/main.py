@@ -7,7 +7,6 @@ import os
 import aioboto3
 import aiohttp
 
-
 BASE_URL = "https://collectionapi.metmuseum.org/public/collection/v1"
 OUTPUT_FILE = "met_objects.json"
 S3_BUCKET = os.getenv("S3_BUCKET")
@@ -22,6 +21,26 @@ async def fetch_object(session, object_id, semaphore):
                     return await resp.json()
         except Exception:
             return None
+
+async def fetch_and_upload_image(session, s3, object_id, image_url):
+    if not image_url or not image_url.lower().endswith('.jpg'):
+        return None
+    try:
+        async with session.get(image_url, timeout=20) as resp:
+            if resp.status == 200:
+                img_bytes = await resp.read()
+                key = f"images/{object_id}.jpg"
+                await s3.put_object(
+                    Bucket=S3_BUCKET,
+                    Key=key,
+                    Body=img_bytes,
+                    ContentType="image/jpeg"
+                )
+                print(f"Uploaded image {key} to s3://{S3_BUCKET}/")
+                return key
+    except Exception:
+        pass
+    return None
 
 async def upload_to_s3(data, bucket, key):
     session = aioboto3.Session()
@@ -50,15 +69,22 @@ async def main():
         ]
 
         objects = []
-        for i, coro in enumerate(asyncio.as_completed(tasks), 1):
-            obj = await coro
-            if obj:
-                objects.append(obj)
-            if i % 100 == 0:
-                print(f"Fetched {i} objects...")
+        session_boto = aioboto3.Session()
+        async with session_boto.client("s3") as s3:
+            for i, coro in enumerate(asyncio.as_completed(tasks), 1):
+                obj = await coro
+                if obj:
+                    # Download and upload image if available
+                    image_url = obj.get("primaryImage")
+                    image_key = await fetch_and_upload_image(session, s3, obj["objectID"], image_url)
+                    if image_key:
+                        obj["s3ImageKey"] = image_key
+                    objects.append(obj)
+                if i % 100 == 0:
+                    print(f"Fetched {i} objects...")
 
-    # Step 3: Upload to S3
-    await upload_to_s3(objects, S3_BUCKET, OUTPUT_FILE)
+        # Step 3: Upload JSON to S3
+        await upload_to_s3(objects, S3_BUCKET, OUTPUT_FILE)
 
 if __name__ == "__main__":
     asyncio.run(main())
