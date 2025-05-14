@@ -27,6 +27,38 @@ poll-position/
 
 * AWS account and IAM user with minimal policy, like:
 ```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:*",
+        "iam:CreateRole",
+        "iam:AttachRolePolicy",
+        "iam:PassRole",
+        "iam:DeleteRole",
+        "iam:DetachRolePolicy",
+        "s3:*",
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret",
+        "logs:*",
+        "events:*",
+        "ec2:DescribeAvailabilityZones",
+        "ec2:DescribeVpcs",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeRouteTables",
+        "ec2:DescribeInternetGateways",
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:GetParametersByPath",
+        "es:*"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
 ```
 * A deployment of requisite infrastructure like [art-vandelay-db](https://www.github.com/reedmarkham/art-vandelay-db)
 * Before running the workflow, add the following secrets to your GitHub repository’s **Settings > Secrets and variables > Actions > repository secrets**:
