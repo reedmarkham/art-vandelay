@@ -1,6 +1,6 @@
 ## 🎨 art-vandelay
 
-This is a containerized workflow to query object data from [The Met's API](https://metmuseum.github.io/), generate OpenAI's [CLIP](https://github.com/jina-ai/clip-as-service) image embeddings, and load them into `art-vandelay-db`: an OpenSearch vector database as well as S3 bucket for corresponding images. The process is accelerated by GPU.
+This is a containerized workflow to query object data from [The Met's API](https://metmuseum.github.io/), generate OpenAI's [CLIP](https://www.github.com/jina-ai/clip-as-service) image embeddings, and load them into `art-vandelay-db`: an OpenSearch vector database as well as S3 bucket for corresponding images. The process is accelerated by GPU.
 
 ## Folder Structure
 
@@ -28,7 +28,7 @@ poll-position/
 * AWS account and IAM user with minimal policy, like:
 ```
 ```
-* A deployment of requisite infrastructure like [art-vandelay-db](github.com/reedmarkham/art-vandelay-db)
+* A deployment of requisite infrastructure like [art-vandelay-db](https://www.github.com/reedmarkham/art-vandelay-db)
 * Before running the workflow, add the following secrets to your GitHub repository’s **Settings > Secrets and variables > Actions > repository secrets**:
 
 | Secret Name         | Description                                              | Example                |
